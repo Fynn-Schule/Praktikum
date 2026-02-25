@@ -1,13 +1,16 @@
-1.Release Apk für die Multitool-App(Braucht ein android handy zum instalieren)
+# test_02
 
-  - Datei herunterladen und extrahieren
-  
-  - WICHTIG: Tests wurden auf einem Google Pixel 7a durchgefürht, es könnte Probleme auf anderen Geräten geben
+A new Flutter project.
 
-2.Source für die App
+## Getting Started
 
-3.Lebenslaufgenerator.html für den dowload(Local host)
+This project is a starting point for a Flutter application.
 
-  - Option A: Datei herunterladen und öffnen
+A few resources to get you started if this is your first Flutter project:
 
-  - Option B: Source code kopieren und in einem beliebigen Code-Editor öffnen (auch Notepad möglich) und als .html Datei abspeichern und dann öffnen
+- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
+- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+
+For help getting started with Flutter development, view the
+[online documentation](https://docs.flutter.dev/), which offers tutorials,
+samples, guidance on mobile development, and a full API reference.
