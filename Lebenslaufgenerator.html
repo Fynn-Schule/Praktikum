@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lebenslaufgenerator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+    body {
+        background: linear-gradient(135deg, #8d04fc, #f2ff00);
+    }
+    .outline-text {
+        filter: drop-shadow(2px 2px 0px black) drop-shadow(-1px -1px 0px black);
+    }
+
+    @media print {
+        
+        @page {
+            margin: 0;
+            size: auto;
+        }
+
+        body { 
+            background: rgb(255, 255, 255) !important; 
+            padding: 0 !important; 
+            margin: 0 !important;
+            height: auto !important;
+            min-height: 0 !important;
+        }
+       
+        body * { visibility: hidden; } 
+        
+       
+        #cv-output, #cv-output * { visibility: visible; } 
+        
+        #cv-output {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+            padding: 20mm; 
+            border: none;
+            box-shadow: none;
+            background: white !important;
+        }
+
+       
+        button, #drop-zone, h1, .print-ignore, #infoSection { 
+            display: none !important; 
+        } 
+    }
+    </style>
+</head>
+<body class="pt-10 pb-20 min-h-screen bg-fixed px-4">
+    <h1 class="text-6xl md:text-[90px] font-black text-center text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-purple-500 pb-2 tracking-tight outline-text mb-10">
+        Lebenslaufgenerator</h1>
+
+    <main class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-8 rounded-xl shadow-2xl max-w-4xl mx-auto">
+        
+        <div class="flex flex-col gap-1">
+            <label class="font-bold">Name</label>
+            <input id="Name" type="text" placeholder="Name eingeben" class="bg-gray-100 p-4 rounded shadow outline-none border-none focus:ring-2 focus:ring-[#b07fd9]">
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label class="font-bold">E-Mail</label>
+            <input id="E-Mail" type="email" placeholder="E-Mail eingeben" class="bg-gray-100 p-4 rounded shadow outline-none border-none focus:ring-2 focus:ring-[#b07fd9]">
+            <span id="error-E-Mail" class="text-red-500 text-xs mt-1 hidden font-bold">Ungültiges E-Mail Format!</span>
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label class="font-bold">Telefonnummer</label>
+            <input id="Telefonnummer" type="text" placeholder="+49 123 456789" 
+                class="bg-gray-100 p-4 rounded shadow outline-none border-none focus:ring-2 focus:ring-[#b07fd9]"
+                oninput="this.value = this.value.replace(/[^0-9+ ]/g, '');">
+        </div>
+        <div class="flex flex-col gap-1">
+            <label class="font-bold">Ausbildung</label>
+            <input id="Ausbildung" type="text" placeholder="Ausbildung" class="bg-gray-100 p-4 rounded shadow outline-none border-none focus:ring-2 focus:ring-[#b07fd9]">
+        </div>
+
+        <div class="flex flex-col gap-1 md:col-span-2">
+            <label class="font-bold">Beschreibung</label>
+            <textarea id="Beschreibung" placeholder="Kurze Beschreibung über dich" class="bg-gray-100 p-4 rounded shadow outline-none border-none focus:ring-2 focus:ring-[#b07fd9] h-24"></textarea>
+        </div>
+
+        <div class="flex flex-col gap-1 md:col-span-2">
+            <label class="font-bold">Berufserfahrung</label>
+            <textarea id="Erfahrung" placeholder="Berufserfahrung" class="bg-gray-100 p-4 rounded shadow outline-none border-none focus:ring-2 focus:ring-[#b07fd9] h-24"></textarea>
+        </div>
+        
+        <div class="flex flex-col gap-1 md:col-span-2 text-center" id="drop-zone" style="border: 2px dashed #ccc; padding: 20px; cursor: pointer;">
+            <p id="drop-text">Zum Bild hochladen klicken</p>
+            <input type="file" id="file-input" accept="image/*" style="display: none;">
+            <img id="preview-img" src="" class="hidden mx-auto mt-2" style="width: 50px; border-radius: 15%;">
+        </div>
+        <button id="abgebenBtn" class="md:col-span-2 bg-gradient-to-r from-yellow-400 to-purple-500 text-white font-bold p-4 rounded-xl shadow-lg hover:scale-105 transition-transform">
+            Generieren
+        </button>
+          <div id="infoSection" class="md:col-span-2 bg-gray-50 p-6 rounded-xl border border-gray-200">
+            <h3 class="font-bold text-lg mb-2 text-purple-600 border-b pb-1">Informationen</h3>
+            <p class="text-sm text-gray-600 mb-4">
+                Fülle alle Felder aus und lade ein Bild hoch. Klicke dann auf "Generieren". 
+                Du kannst den fertigen Lebenslauf danach direkt ausdrucken oder als PDF speichern.
+            </p>
+        </div>
+
+        <div id="cv-output" class="hidden md:col-span-2 mt-10 p-8 border-2 border-gray-300 rounded-2xl bg-gray-50 shadow-inner">
+            <h2 class="text-3xl font-bold text-purple-600 mb-6 border-b-2 border-purple-200 pb-2">Dein Lebenslauf</h2>
+            <div class="flex flex-col md:flex-row gap-6 items-center md:items-start">
+                <img id="out-bild" src="" class="w-32 h-32 rounded-full object-cover shadow-lg border-4 border-white hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full text-left">
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Name</p>
+                        <p id="out-name" class="font-bold text-xl text-gray-800">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Kontakt</p>
+                        <p id="out-kontakt" class="text-gray-700">-</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Ausbildung</p>
+                        <p id="out-ausbildung" class="italic text-gray-600 bg-white p-2 rounded shadow-sm">-</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
+                        <h3 class="font-bold text-purple-500 mb-2">Berufserfahrung</h3>
+                        <p id="out-erfahrung" class="whitespace-pre-line text-gray-700 text-sm">-</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
+                        <h3 class="font-bold text-purple-500 mb-2">Beschreibung</h3>
+                        <p id="out-beschreibung" class="text-gray-700 text-sm">-</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 print-ignore">
+                <button onclick="window.print()" class="w-full bg-purple-600 text-white font-bold p-4 rounded-xl hover:bg-green-700 shadow-lg transition-all flex items-center justify-center gap-2">
+                    Lebenslauf drucken
+                </button>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const dropZone = document.getElementById('drop-zone');
+        const previewImg = document.getElementById('preview-img');
+        const dropText = document.getElementById('drop-text');
+        const abgebenButton = document.getElementById('abgebenBtn');
+        const emailInput = document.getElementById('E-Mail');
+        const emailError = document.getElementById('error-E-Mail');
+        let bildDaten = ""; 
+
+        
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-purple-500'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-purple-500'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-purple-500');
+            handleFile(e.dataTransfer.files[0]);
+        });
+
+        function handleFile(file) {
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    bildDaten = e.target.result;
+                    previewImg.src = bildDaten;
+                    previewImg.classList.remove('hidden');
+                    dropText.innerText = "Bild geladen! ✅";
+                    dropText.classList.add('text-green-500', 'font-bold');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        
+        function checkEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
+        function checkTelefon(tel) {
+         return /^\+?(?!(?:.* ){3})[0-9 ]+$/.test(tel);
+        }
+
+        emailInput.addEventListener('input', () => {
+            if (emailInput.value.length > 0 && !checkEmail(emailInput.value)) {
+                emailError.classList.remove('hidden');
+                emailInput.classList.add('ring-2', 'ring-red-500');
+            } else {
+                emailError.classList.add('hidden');
+                emailInput.classList.remove('ring-2', 'ring-red-500');
+            }
+        });
+
+        
+        abgebenButton.addEventListener('click', (event) => {
+            const nameVal = document.getElementById('Name').value.trim();
+            const emailVal = emailInput.value.trim();
+            const telVal = document.getElementById('Telefonnummer').value.trim();
+            const beschrVal = document.getElementById('Beschreibung').value.trim();
+            const erfahrVal = document.getElementById('Erfahrung').value.trim();
+            const ausbildVal = document.getElementById('Ausbildung').value.trim();
+
+            if (!nameVal || !emailVal || !telVal || !beschrVal || !erfahrVal || !ausbildVal) {
+                alert("Bitte fülle alle Felder aus!");
+                return;
+            } 
+
+            if (!checkEmail(emailVal)) {
+                alert("E-Mail Adresse ist ungültig.");
+                emailInput.focus();
+                return;
+            }
+
+            const outputDiv = document.getElementById('cv-output');
+            const outBild = document.getElementById('out-bild');
+
+            if (bildDaten) {
+                outBild.src = bildDaten;
+                outBild.classList.remove('hidden');
+            }
+
+            document.getElementById('out-name').innerText = nameVal;
+            document.getElementById('out-kontakt').innerText = emailVal + " | " + telVal;
+            document.getElementById('out-beschreibung').innerText = beschrVal;
+            document.getElementById('out-erfahrung').innerText = erfahrVal;
+            document.getElementById('out-ausbildung').innerText = ausbildVal;
+
+            outputDiv.classList.remove('hidden');
+            outputDiv.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // --- EINFACHES UNIT-TEST FRAMEWORK ---
+        function runTests() {
+            console.group(" Starte Unit-Tests...");
+            let passed = 0;
+            let failed = 0;
+
+            function assert(name, condition) {
+                if (condition) {
+                    console.log(` PASSED: ${name}`);
+                    passed++;
+                } else {
+                    console.error(` FAILED: ${name}`);
+                    failed++;
+                }
+            }
+
+            // --- TESTFÄLLE FÜR checkEmail ---
+            assert("Email: Korrektes Format", checkEmail("test@web.de") === true);
+            assert("Email: Fehlendes @", checkEmail("test-web.de") === false);
+            assert("Email: Fehlender Punkt", checkEmail("test@webde") === false);
+
+            // --- TESTFÄLLE FÜR checkTelefon ---
+            assert("Telefon: Nur Zahlen", checkTelefon("0157123456") === true);
+            assert("Telefon: Mit Plus am Anfang", checkTelefon("+49123456") === true);
+            assert("Telefon: Mit Leerzeichen", checkTelefon("+49 123 456") === true);
+            assert("Telefon: Buchstaben verboten", checkTelefon("0157-HALLO") === false);
+
+            console.groupEnd();
+            console.log(`Ergebnis: ${passed} bestanden, ${failed} fehlgeschlagen.`);
+        }
+    </script>
+</body>
+</html>
